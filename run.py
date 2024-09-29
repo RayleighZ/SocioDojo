@@ -72,7 +72,7 @@ def test_sawi(savename='test',ruleset=[]):
         shutil.rmtree(pjoin(root,'Ckpts',savename))
     config['ruleset']=[]
     worldconfig=copy.deepcopy(sawi_worldconfig)
-    worldconfig['default_channels']=['WSJ']#,'WSJ','NYT']
+    worldconfig['default_channels']=['TTT']#,'WSJ','NYT']
     worldconfig['period']=0 #300
     worldconfig['ruleset']=config['ruleset']
     config['worldconfig']=worldconfig
@@ -80,7 +80,7 @@ def test_sawi(savename='test',ruleset=[]):
     agentconfig['type']='random'
     agentconfig['name']='default'
     agentconfig['config']={
-        'channels':{'WSJ':None},  #{'NYT':None,'WSJ':None,'TTT':None},
+        'channels':{'RGS':None},  #{'NYT':None,'WSJ':None,'TTT':None},
         'wl_levels':{'FIN':0.04,'default':0.05,'FRD':0.02},
         'ruleset': config['ruleset'],
     }
@@ -107,7 +107,7 @@ def run_ca(savename=None,analyse_fn='',debug_mode=False):
     config['worldconfig']=worldconfig
 
     agentconfig=copy.deepcopy(base_agentconfig)
-    agentconfig['type']='chatagent'
+    agentconfig['type']='random'
     agentconfig['name']='default'
     agentconfig['config']={
         'channels':{'WSJ':None},  
@@ -134,3 +134,5 @@ def run_ca(savename=None,analyse_fn='',debug_mode=False):
     end_time='2023-08-01'
     run.run(end_time)
 
+# run_ca('demo')
+test_sawi()
