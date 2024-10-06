@@ -101,13 +101,13 @@ def run_ca(savename=None,analyse_fn='',debug_mode=False):
     config=copy.deepcopy(base_config)
     config['ruleset']=['nodt']
     worldconfig=copy.deepcopy(sawi_worldconfig)
-    worldconfig['default_channels']=['WSJ']
+    worldconfig['default_channels']=['TTT']
     worldconfig['period']=0 #300
     worldconfig['ruleset']=config['ruleset']
     config['worldconfig']=worldconfig
 
     agentconfig=copy.deepcopy(base_agentconfig)
-    agentconfig['type']='random'
+    agentconfig['type']='chatagent'
     agentconfig['name']='default'
     agentconfig['config']={
         'channels':{'WSJ':None},  
@@ -134,5 +134,5 @@ def run_ca(savename=None,analyse_fn='',debug_mode=False):
     end_time='2023-08-01'
     run.run(end_time)
 
-# run_ca('demo')
-test_sawi()
+run_ca('demo')
+# test_sawi()
