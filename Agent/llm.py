@@ -33,6 +33,29 @@ class BaseLLMAget:
         raise NotImplementedError('LLMAgent pipeline not implemented')
 
 
+def filter_function(response: str) -> list:
+    function_list = []
+    if '<function' not in response:
+        return function_list
+    function_fragment = response.split('<function')
+    for f in function_fragment:
+        # print(f'f is {f}')
+        if not f.startswith('='):
+            continue
+        function = {}
+        function_name = f.split('>')[0][1:]
+        param_str = '{' + f.split('{')[-1].split('}')[0] + '}'
+        try:
+            param = json.loads(param_str) if param_str != '' else {}
+        except json.JSONDecodeError:
+            param = {}
+        function = {
+            'name': function_name,
+            'parameter': param
+        }
+        function_list.append(function)
+    return function_list
+
 class Llama318BAgent(BaseLLMAget):
     def __init__(self, temperature: float, top_p: int, model_path: str):
         super().__init__(temperature, top_p)
@@ -70,21 +93,9 @@ class Llama318BAgent(BaseLLMAget):
         result = {
             'content': response
         }
-
-        if '<function' in response:
-            function_info = response.split('<function=')[-1].split('</function')[0]
-            function_name = function_info.split('>')[0]
-            paramater_str = '{' + function_info.split('{')[-1].split('}')[0] + '}'
-            result['function_call'] = {
-                'name': function_name,
-            }
-            try:
-                paramater = json.loads(paramater_str) if paramater_str != '' else {}
-            except json.JSONDecodeError:
-                paramater = {}
-            result['function_call'] = {
-                'name': function_name,
-                'paramater': paramater
-            }
-
+        function_list = filter_function(response)
+        if len(function_list) == 1:
+            result['function_call'] = function_list[0]
+        elif len(function_list) != 0:
+            result['function_call'] = function_list
         return result

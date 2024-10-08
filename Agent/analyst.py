@@ -7,6 +7,7 @@ from langchain.agents import load_tools
 from langchain.agents import initialize_agent
 from langchain.agents import AgentType
 from langchain.llms import OpenAI
+from sqlalchemy import func
 from sqlalchemy.engine import result
 
 # try:
@@ -192,7 +193,7 @@ class LlamaAnalyst(BaseLlamaAnalyst):
             function_call=[],  # auto is default, but we'll be explicit 
             date=self.time
         )
-        message = response["choices"][0]["message"]
+        message = response
         send="function_call" in message and message["function_call"]['name'].lower()=='send'
         if send: messages.append(self.message('system','You decide to send the analysis.'))
         else: messages.append(self.message('system','You decide not to send the analysis.'))
@@ -252,29 +253,38 @@ class LlamaAnalyst(BaseLlamaAnalyst):
     def handle_call(self,message,messages,time):
         done=False
         if "function_call" in message:
-            fn=message["function_call"]['name'].lower()
-            ok=False
-            try:
-                args=message["function_call"]['paramater']
-                ok=True
-            except: message=self.message('system',f'ERROR: Arguments {message["function_call"]["arguments"]} is not a json. You must provide a json as arguments.')
-            if ok:
-                if fn=='done': 
-                    done=True
-                    message=self.message('system','You are prepared to give the final analysis report.')
-                elif fn=='ask': 
-                    sys_message=self.message('system',f'You ask the assistant to help you with the analysis: {args["query"]}')
-                    messages.append(sys_message)
-                    ret,assistant_messages=self.ask(args['query'],time)
-                    message=self.message('function',ret,fn)
-                    self.record['assistant'].append(assistant_messages)
-                # elif fn=='continue':
-                #     message=self.message('system','You choose continue the analysis.')
-                else: 
-                    message=self.message('system',f'Invalid function call: {fn} Valid function calls are ask and done.')
+            function_list = message['function_call']
+            if not isinstance(function_list, list):
+                function_list = [function_list]
+            for f in function_list:
+                fn=f['name'].lower()
+                ok=False
+                try:
+                    args=f['parameter']
+                    ok=True
+                except: message=self.message('system',f'ERROR: Arguments {f["parameter"]} is not a json. You must provide a json as arguments.')
+                if ok:
+                    if fn=='done': 
+                        done=True
+                        message=self.message('system','You are prepared to give the final analysis report.')
+                    elif fn=='ask': 
+                        print(f'args: {args}, message: {message}')
+                        if 'query' not in args:
+                            message=self.message('system',f'Invalid function call: {fn} Valid function calls are ask and done.')
+                        else:
+                            sys_message=self.message('system',f'You ask the assistant to help you with the analysis: {args["query"]}')
+                            messages.append(sys_message)
+                            ret,assistant_messages=self.ask(args['query'],time)
+                            message=self.message('function',ret,fn)
+                            self.record['assistant'].append(assistant_messages)
+                    # elif fn=='continue':
+                    #     message=self.message('system','You choose continue the analysis.')
+                    else: 
+                        message=self.message('system',f'Invalid function call: {fn} Valid function calls are ask and done.')
+                messages.append(message)
         else: 
             message=self.message('system','You do not call any function. You must call one of ask or done.')
-        messages.append(message)
+            messages.append(message)
         return done,messages
     
     def do_analysis(self,news,messages,time,limit=5):
@@ -317,6 +327,7 @@ class LlamaAnalyst(BaseLlamaAnalyst):
         message=output
         content=message["content"]
         messages.append(message)
+        message['role'] = 'analyst'
         if self.verbose: self.show_message(message)
         return messages,content
     

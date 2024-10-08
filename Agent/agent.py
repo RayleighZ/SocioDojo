@@ -9,8 +9,8 @@ import numpy as np
 # from Agent.const import DCODE_DESCRIPTION
 
 from Agent.utils import pjoin,pexist,makedirs,save_json,load_json,get_icodes
-from Agent.actuator import ChatActuator
-from Agent.assistant import ChatAssistant
+from Agent.actuator import ChatActuator, LlamaActuator
+from Agent.assistant import ChatAssistant, LlamaAssistant
 from Agent.analyst import ChatAnalyst, LlamaAnalyst
 
 
@@ -176,13 +176,13 @@ class LlamaAgent(BaseAgent):
 
     def setup(self):
         print('Setup Actuator...')
-        self.actuator=ChatActuator(self.root,self.trade,self.state,self.probe,self.get_metadata, self.apikeys['openai_apikey'],
+        self.actuator=LlamaActuator(self.root,self.trade,self.state,self.probe,self.get_metadata, model_path=self.config['model_path'],
                                    model_name=self.config['assistant_model'],verbose=self.config['actuator_verbose'],
                                    limit=self.config['actuator_limit'],ruleset=self.ruleset,
                                    temperature=self.config['temperature'],top_p=self.config['top_p'],)
         print('Setup Assistant...')
-        self.assistant=ChatAssistant(self.root,self.query,self.probe,self.actuator.query,self.get_metadata,
-                                     self.apikeys['openai_apikey'],model_name=self.config['assistant_model'],
+        self.assistant=LlamaAssistant(self.root,self.query,self.probe,self.actuator.query,self.get_metadata,
+                                     model_path=self.config['model_path'],model_name=self.config['assistant_model'],
                                      verbose=self.config['assistant_verbose'],limit=self.config['assistant_limit'],
                                      temprature=self.config['temperature'],top_p=self.config['top_p'])
         print('Setup Analyst...')

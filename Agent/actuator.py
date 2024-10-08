@@ -458,7 +458,7 @@ class LlamaActuator(BaseLlamaActuator):
             state_fn,
             probe_fn,
             get_metadata_fn,
-            openai_apikey,
+            model_path,
             verbose=False,
             model_name="gpt-3.5-turbo-16k",
             temperature=0.2,
@@ -469,7 +469,7 @@ class LlamaActuator(BaseLlamaActuator):
             ruleset=[],
         ):
         super().__init__(root,trade_fn,state_fn,probe_fn,get_metadata_fn,
-                         openai_apikey,verbose,simu_mode,ruleset)
+                         model_path,verbose,simu_mode,ruleset)
         self.model_name=model_name
         self.icodelist=get_icodes(root)
         self.limit=limit

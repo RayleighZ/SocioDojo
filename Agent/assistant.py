@@ -189,6 +189,56 @@ class LlamaAssistant(BaseLlamaAssistant):
             messages.append(self.message('system','Now based on the results, accomplish the query. If there is an error such as wrong ICode when calling the probe, handle it and retry. You can also do futher search or decompose the query. When you finish, call done function.'))
         return done,messages
 
+    def handle_query_list(self,message,messages): # search api already set time in world
+        done=False
+        query=None
+        if "function_call" in message:
+            if len(message['function_call']) == 1:
+                message['function_call'] = [message['function_call']]
+            for f in message["function_call"]:
+                fn=f['name'].lower()
+                ok=False
+                try:
+                    args=f['parameter']
+                    ok=True
+                except: message=self.message('system',f'ERROR: Arguments {message["function_call"]["arguments"]} is not a json. You must provide a json as arguments.')
+                if ok:
+                    if fn=='done': 
+                        done=True
+                        message=self.message('system','You have finished the query.')
+                    elif fn=='wikisearch': 
+                        ret=self.wikisearch(args['query'])
+                        query=args['query']
+                    elif fn=='googlesearch': 
+                        ret=self.googlesearch(args['query'])
+                        query=args['query']
+                    elif fn=='gkgsearch': 
+                        ret=self.gkgsearch(args['query'])
+                        query=args['query']
+                    elif fn=='probe': 
+                        ret=self.probe(args['icode'])
+                        query=args['icode']
+                    elif fn=='askdb': 
+                        ret=self.askdb(args['query'])
+                        query=args['query']
+                    elif fn=='query_icode': 
+                        ret=self.query_icode(args['query'])
+                        query=args['query']
+                    elif fn=='get_metadata':
+                        ret=self.get_metadata(args['icode'])
+                        query=args['icode']
+                    else: message=self.message('system',f'Invalid function call: {fn}. Valid function calls are wikisearch, googlesearch, gkgsearch, probe, askdb, query_icode.')
+                if query is not None: 
+                    messages.append(self.message('system',f'You are querying {fn}: {query}'))
+                    message=self.message('function',f'Return for your query {query}:'+str(ret),fn)
+                messages.append(message)
+                if query is not None: 
+                    messages.append(self.message('system','Now based on the results, accomplish the query. If there is an error such as wrong ICode when calling the probe, handle it and retry. You can also do futher search or decompose the query. When you finish, call done function.'))
+        else: 
+            message=self.message('system','You do not call any function. If you have finished the query, please call done function.')
+            messages.append(message)
+        return done,messages
+
     def ask(self,query,time,limit=5):
         messages=[self.message('system',PROMPT.context.format(query=query,time=time))]
         while limit>0:
@@ -201,7 +251,7 @@ class LlamaAssistant(BaseLlamaAssistant):
             )
             message = response
             content=message["content"]
-            done,messages=self.handle_query(message,messages)
+            done,messages=self.handle_query_list(message,messages)
             if done: break
         messages.append(self.message('system',f'Now, based on the search results, give your final reply to the query from analyst "{query}". You must clearly reference from the search results returned by function calls.'))
         response = self.llm_model.inference(
