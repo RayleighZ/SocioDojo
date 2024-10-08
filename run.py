@@ -107,7 +107,7 @@ def run_ca(savename=None,analyse_fn='',debug_mode=False):
     config['worldconfig']=worldconfig
 
     agentconfig=copy.deepcopy(base_agentconfig)
-    agentconfig['type']='chatagent'
+    agentconfig['type']='llamaagent'
     agentconfig['name']='default'
     agentconfig['config']={
         'channels':{'WSJ':None},  
@@ -116,9 +116,10 @@ def run_ca(savename=None,analyse_fn='',debug_mode=False):
         'assistant_limit': 2,
         'temperature': 0.2,
         'top_p': 0.1,
-        'analyst_model': 'gpt-3.5-turbo-16k',
-        'actuator_model': 'gpt-3.5-turbo-16k',
-        'assistant_model': 'gpt-3.5-turbo-16k',
+        'analyst_model': 'llama3.1_8b',
+        'actuator_model': 'llama3.1_8b',
+        'assistant_model': 'llama3.1_8b',
+        'model_path': '/work/zhangyu/dev/LLM-models/Llama-3.1-8B-Instruct',
         'analyst_verbose': True,
         'actuator_verbose': False,
         'assistant_verbose': False,

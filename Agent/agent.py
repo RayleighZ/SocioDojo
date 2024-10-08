@@ -11,7 +11,7 @@ import numpy as np
 from Agent.utils import pjoin,pexist,makedirs,save_json,load_json,get_icodes
 from Agent.actuator import ChatActuator
 from Agent.assistant import ChatAssistant
-from Agent.analyst import ChatAnalyst
+from Agent.analyst import ChatAnalyst, LlamaAnalyst
 
 
 def build_agent(root,savename,apikeys,config,debug_mode=False):
@@ -22,6 +22,8 @@ def build_agent(root,savename,apikeys,config,debug_mode=False):
         return RandomAgent(agentconfig,root,savename,agentname,apikeys)
     elif agenttype=='chatagent':
         return ChatAgent(agentconfig,root,savename,agentname,apikeys,debug_mode)
+    elif agenttype=='llamaagent':
+        return LlamaAgent(agentconfig,root,savename,agentname,apikeys,debug_mode)
     else:
         raise f'Agent type {agenttype} not found.'
 
@@ -148,7 +150,58 @@ class RandomAgent(BaseAgent):
         state=load_json(pjoin(self.savepath,'state.json'))
         if 'wl_symbols' in state:
             self.wl.add_symbols(state['wl_symbols'])
+ 
+
+class LlamaAgent(BaseAgent):
+    """
+    Should only expose chat to agent
+    """
+    def __init__(self,config,root,savename,agentname,apikeys,debug_mode=False):
+        super().__init__(root,savename,agentname,'chatworld',apikeys)
+        self.config=config
+        self.ruleset=config['ruleset']
+        self.debug_mode=debug_mode
+        self.savedir=pjoin(self.savepath,'llama')
+        makedirs(self.savedir)
         
+        self.record_index=0
+        while True:
+            if pexist(pjoin(self.savedir,f'{self.record_index}.json')) or \
+                pexist(pjoin(self.savedir,'unread',f'{self.record_index}.json')) or \
+                pexist(pjoin(self.savedir,'unsend',f'{self.record_index}.json')): 
+                self.record_index+=1
+                continue
+            break
+        
+
+    def setup(self):
+        print('Setup Actuator...')
+        self.actuator=ChatActuator(self.root,self.trade,self.state,self.probe,self.get_metadata, self.apikeys['openai_apikey'],
+                                   model_name=self.config['assistant_model'],verbose=self.config['actuator_verbose'],
+                                   limit=self.config['actuator_limit'],ruleset=self.ruleset,
+                                   temperature=self.config['temperature'],top_p=self.config['top_p'],)
+        print('Setup Assistant...')
+        self.assistant=ChatAssistant(self.root,self.query,self.probe,self.actuator.query,self.get_metadata,
+                                     self.apikeys['openai_apikey'],model_name=self.config['assistant_model'],
+                                     verbose=self.config['assistant_verbose'],limit=self.config['assistant_limit'],
+                                     temprature=self.config['temperature'],top_p=self.config['top_p'])
+        print('Setup Analyst...')
+        self.analyst=LlamaAnalyst(self.actuator,self.assistant,model_path=self.config['model_path'],model_name=self.config['analyst_model'],
+                                 verbose=self.config['analyst_verbose'],limit=self.config['analyst_limit'],debug_mode=self.debug_mode,
+                                 ruleset=self.ruleset,analyse_fn=self.config['analyse_fn'],second_response=self.config['second_response'],
+                                 serp_apikey=self.apikeys['serp_apikey'],temprature=self.config['temperature'],top_p=self.config['top_p'])
+    
+    def sense(self, message):
+        record=self.analyst(message) 
+        time=str(message["time"])
+        record['time']=time
+        if not record['read']: sdir=pjoin(self.savedir,'unread')
+        else:
+            if not record['send']: sdir=pjoin(self.savedir,'unsend') 
+            else: sdir=self.savedir
+        makedirs(sdir)
+        save_json(pjoin(sdir,f'{self.record_index}.json'),record)
+        self.record_index+=1       
 
 
 class ChatAgent(BaseAgent):
