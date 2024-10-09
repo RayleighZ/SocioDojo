@@ -21,7 +21,7 @@ from Agent.llm import Llama318BAgent
 #     import prompts.base_instruct as BASE_PROMPT
 #     import prompts.analyst_instruct as PROMPT
 
-DEBUG = True
+DEBUG = False
 
 class BaseAnalyst:
     """
@@ -187,6 +187,8 @@ class LlamaAnalyst(BaseLlamaAnalyst):
         
 
     def whether_send(self,messages):
+        if DEBUG:
+            return True
         messages=copy.deepcopy(messages)
         messages.append(self.message('system',PROMPT.whether_send))
         response = self.llm_model.inference(
@@ -221,6 +223,8 @@ class LlamaAnalyst(BaseLlamaAnalyst):
     
     def whether_read(self,metadata,messages):
         messages=copy.deepcopy(messages)
+        if DEBUG:
+            return True
         read=False
         if metadata=="": read=True
         else:
@@ -290,6 +294,8 @@ class LlamaAnalyst(BaseLlamaAnalyst):
         return done,messages
     
     def do_analysis(self,news,messages,time,limit=5):
+        if DEBUG:
+            return {'role': 'analyst', 'content': 'The top trending topics are related to the Cincinnati Bengals and the Jacksonville Jaguars, which are two teams in the National Football League (NFL). The high search volume and tweet count for these topics suggest that there is a lot of interest and excitement around these teams.'}, 'The top trending topics are related to the Cincinnati Bengals and the Jacksonville Jaguars, which are two teams in the National Football League (NFL). The high search volume and tweet count for these topics suggest that there is a lot of interest and excitement around these teams.'
         messages.append(self.message('user',PROMPT.analysis_template.format(time=time,news=news,account_status=self.state_message())))
         if self.analyse_option=='hnp':
             messages.append(self.message('system',PROMPT.hypothesis_proof))

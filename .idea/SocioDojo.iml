@@ -6,6 +6,11 @@
       <excludeFolder url="file://$MODULE_DIR$/Env/IS" />
       <excludeFolder url="file://$MODULE_DIR$/Env/KB" />
       <excludeFolder url="file://$MODULE_DIR$/Env/TS" />
+      <excludeFolder url="file://$MODULE_DIR$/.idea/dataSources" />
+      <excludeFolder url="file://$MODULE_DIR$/Agent/db/1b090526-1d2a-44e0-b649-8fce508d962e" />
+      <excludeFolder url="file://$MODULE_DIR$/Agent/db/1b46744e-5ea6-4afa-a732-86868aa71d3e" />
+      <excludeFolder url="file://$MODULE_DIR$/Agent/db/46acb947-c6ec-4b36-8e08-9a20766b0ff5" />
+      <excludeFolder url="file://$MODULE_DIR$/Agent/db/f638bc75-5a9b-4b98-8e70-59b4804cddba" />
       <excludeFolder url="file://$MODULE_DIR$/Ckpts" />
       <excludeFolder url="file://$MODULE_DIR$/archive" />
     </content>

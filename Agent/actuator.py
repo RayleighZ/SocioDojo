@@ -1,3 +1,4 @@
+import pdb
 import uuid
 import os
 from tqdm import tqdm
@@ -18,6 +19,8 @@ from langchain.memory import ConversationBufferMemory
 import chromadb
 from chromadb.config import Settings
 from chromadb.utils import embedding_functions
+from transformers.utils.chat_template_utils import args_split_re
+
 from Agent.llm import Llama318BAgent
 try:
     from Agent.utils import pexist,pjoin,readtxt,get_icodes,get_tracklist
@@ -500,23 +503,32 @@ class LlamaActuator(BaseLlamaActuator):
     
     def act(self,action) -> str:
         name=action['name']
+        def args_safe_calling(func_name, parameter_name, parameter, func) -> str:
+            if parameter_name in parameter:
+                return func(parameter[parameter_name])
+            else:
+                return f'ERROR: Parameter {parameter_name} not found when calling function {func_name}'
         try:
             args=action['parameter']
         except: return f'ERROR: Arguments {action["parameter"]} is not a json.'
-        if name=='trade': ret = self.trade(args['instructions'])
-        elif name=='wait': 
+        if name=='trade':
+            ret=args_safe_calling('trade', 'instructions', args, self.trade)
+        elif name=='wait':
             if 'memo' not in args: ret=self.wait()
             else: ret=self.wait(args['memo'])
-        elif name=='query': ret=self.query(args['query'])
-        elif name=='probe': ret=self.probe_fn(args['icode'])
-        elif name=='get_metadata': ret=self.get_metadata_fn(args['icode'])
+        elif name=='query':
+            ret=args_safe_calling('query', 'query', args, self.query)
+        elif name=='probe':
+            ret=args_safe_calling('probe', 'icode', args, self.probe_fn)
+        elif name=='get_metadata':
+            ret=args_safe_calling('get_metadata', 'icode', args, self.get_metadata_fn)
         else: ret=f'ERROR: Function {name} not exist.'
         act_message=self.render_act_message(action,ret)
         return name,act_message
 
     def render_act_message(self, action, ret) -> str:
         name=action['name']
-        args=action['paramater']
+        args=action['parameter']
         if 'ERROR' in ret: return self.message('system',f'You made an error when calling {name}, try to fix it: {ret}')
         if name=='trade': 
             if 'Succeed' in ret:
@@ -556,7 +568,8 @@ class LlamaActuator(BaseLlamaActuator):
                 function_call=PROMPT.functions,  # auto is default, but we'll be explicit 
                 date=time
             )
-            __import__('pdb').set_trace()
+            # DEBUG:
+            response = {'content': '<function=query>{"query": "FIN:BTC-USD"} </function>', 'function_call': {'name': 'query', 'parameter': {'query': 'FIN:BTC-USD'}}}
             message = response
             if 'function_call' in message:
                 action, act_message=self.act(message["function_call"])
