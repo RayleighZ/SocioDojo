@@ -6,6 +6,8 @@
       <excludeFolder url="file://$MODULE_DIR$/Env/IS" />
       <excludeFolder url="file://$MODULE_DIR$/Env/KB" />
       <excludeFolder url="file://$MODULE_DIR$/Env/TS" />
+      <excludeFolder url="file://$MODULE_DIR$/Ckpts" />
+      <excludeFolder url="file://$MODULE_DIR$/archive" />
     </content>
     <orderEntry type="jdk" jdkName="sajo" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />

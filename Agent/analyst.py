@@ -56,6 +56,7 @@ class BaseAnalyst:
         return [self.message('system',BASE_PROMPT.context+PROMPT.context)]
     
     def actuate(self,analysis,time):
+        print('=========================================== actuate ==================================================')
         return self.actuator(analysis,time)
 
     def ask(self,query,time):
@@ -103,6 +104,7 @@ class BaseLlamaAnalyst:
         self.verbose=verbose
         self.ruleset=ruleset
         self.llm_model = Llama318BAgent(temperature, top_p, model_path)
+        self.role = 'analyst'
         if 'track' in self.ruleset:
             self.tracklist=self.actuator.tracklist
 
@@ -179,7 +181,7 @@ class LlamaAnalyst(BaseLlamaAnalyst):
         return self.get_state()
 
     def show_message(self,message):
-        role=message["role"]
+        role=message['role']
         if role=='assistant': role='analyst'
         print(f'[{role}]:\n\n{message["content"]}\n\n')
         
@@ -190,7 +192,7 @@ class LlamaAnalyst(BaseLlamaAnalyst):
         response = self.llm_model.inference(
             messages=messages,
             device='cuda:0',
-            function_call=[],  # auto is default, but we'll be explicit 
+            function_call=PROMPT.send_functions,  # auto is default, but we'll be explicit 
             date=self.time
         )
         message = response
@@ -222,6 +224,7 @@ class LlamaAnalyst(BaseLlamaAnalyst):
         read=False
         if metadata=="": read=True
         else:
+            print('======================================================== in whether read function ========================================================')
             messages.append(self.message('system',PROMPT.whether_read.format(metadata=metadata)))
             response = self.llm_model.inference(
                 messages=messages,
@@ -245,7 +248,6 @@ class LlamaAnalyst(BaseLlamaAnalyst):
         )
         message = response
         content=message["content"]
-        message['role'] = 'analyst'
         if self.verbose: self.show_message(message)
         messages.append(message)
         return messages,content
@@ -296,6 +298,7 @@ class LlamaAnalyst(BaseLlamaAnalyst):
         while limit>0:
             limit-=1
             fn=PROMPT.hnp_functions
+            print('======================================================== in do analysis function ========================================================')
             response = self.llm_model.inference(
                 messages=messages,
                 device='cuda:0',
@@ -303,8 +306,10 @@ class LlamaAnalyst(BaseLlamaAnalyst):
                 date=self.time
             )
             message = response
+            message['role'] = 'analyst'
             done,messages=self.handle_call(message,messages,time)
             if done: break
+            print('======================================================== in whether read function (second) ========================================================')
             if self.second_response:
                 second_response = self.llm_model.inference(
                     messages=messages,
@@ -312,13 +317,14 @@ class LlamaAnalyst(BaseLlamaAnalyst):
                     date=self.time
                 )
                 message=second_response
-                messages.append(message)
                 message['role'] = 'analyst'
+                messages.append(message)
                 if self.verbose: self.show_message(message)
             # if done and self.second_response:
             #     return messages,message["content"]
         fr_prompt=PROMPT.final_report_hnp if self.analyse_option=='hnp' else PROMPT.final_report
         messages.append(self.message('system',fr_prompt))
+        print('======================================================== in output function ========================================================')
         output = self.llm_model.inference(
             messages=messages,
             device='cuda:0',
@@ -326,8 +332,8 @@ class LlamaAnalyst(BaseLlamaAnalyst):
         )
         message=output
         content=message["content"]
-        messages.append(message)
         message['role'] = 'analyst'
+        messages.append(message)
         if self.verbose: self.show_message(message)
         return messages,content
     

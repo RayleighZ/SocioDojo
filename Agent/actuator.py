@@ -469,7 +469,7 @@ class LlamaActuator(BaseLlamaActuator):
             ruleset=[],
         ):
         super().__init__(root,trade_fn,state_fn,probe_fn,get_metadata_fn,
-                         model_path,verbose,simu_mode,ruleset)
+                         model_path,temperature,top_p,verbose,simu_mode,ruleset)
         self.model_name=model_name
         self.icodelist=get_icodes(root)
         self.limit=limit
@@ -501,8 +501,8 @@ class LlamaActuator(BaseLlamaActuator):
     def act(self,action) -> str:
         name=action['name']
         try:
-            args=json.loads(action['arguments'])
-        except: return f'ERROR: Arguments {action["arguments"]} is not a json.'
+            args=action['parameter']
+        except: return f'ERROR: Arguments {action["parameter"]} is not a json.'
         if name=='trade': ret = self.trade(args['instructions'])
         elif name=='wait': 
             if 'memo' not in args: ret=self.wait()
@@ -516,7 +516,7 @@ class LlamaActuator(BaseLlamaActuator):
 
     def render_act_message(self, action, ret) -> str:
         name=action['name']
-        args=json.loads(action['arguments'])
+        args=action['paramater']
         if 'ERROR' in ret: return self.message('system',f'You made an error when calling {name}, try to fix it: {ret}')
         if name=='trade': 
             if 'Succeed' in ret:
@@ -556,6 +556,7 @@ class LlamaActuator(BaseLlamaActuator):
                 function_call=PROMPT.functions,  # auto is default, but we'll be explicit 
                 date=time
             )
+            __import__('pdb').set_trace()
             message = response
             if 'function_call' in message:
                 action, act_message=self.act(message["function_call"])
