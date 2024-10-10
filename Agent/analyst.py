@@ -1,3 +1,4 @@
+import pdb
 import random
 import openai
 import os
@@ -313,6 +314,7 @@ class LlamaAnalyst(BaseLlamaAnalyst):
             )
             message = response
             message['role'] = 'analyst'
+            # pdb.set_trace()
             done,messages=self.handle_call(message,messages,time)
             if done: break
             print('======================================================== in whether read function (second) ========================================================')

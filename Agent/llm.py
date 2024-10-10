@@ -2,7 +2,7 @@ import transformers
 
 from transformers import AutoTokenizer, LlamaForCausalLM
 import json
-
+import hashlib
 
 function_call_exp = '''
 If a you choose to call a function, the function calling part of reply should in the following format:
@@ -16,6 +16,9 @@ end_tag => `</function>`
 Here is an example,
 <function=example_function_name>{"example_name": "example_value"}</function>
 '''
+
+reaction_cache = {}
+import pickle
 
 DEBUG = True
 
@@ -79,13 +82,14 @@ class Llama318BAgent(BaseLLMAget):
             add_generation_prompt=True,
             return_tensors='pt'
         )
+        input_hash = inputs.numpy().tobytes()
         sequences = self.model.generate(
             inputs,
             do_sample=True,
             top_p=self.top_p,
             eos_token_id=self.terminators,
             temperature=self.temperature,
-            max_length=11451
+            max_new_tokens=500
         )
         response = sequences[0][inputs.shape[-1]:]
         response = self.tokenizer.decode(response, skip_special_tokens=True)
@@ -98,4 +102,7 @@ class Llama318BAgent(BaseLLMAget):
             result['function_call'] = function_list[0]
         elif len(function_list) != 0:
             result['function_call'] = function_list
+        reaction_cache[f'{input_hash}'] = result
+        with open('./reaction_cache.pkl', 'wb') as f:
+            pickle.dump(reaction_cache, f)
         return result

@@ -569,15 +569,20 @@ class LlamaActuator(BaseLlamaActuator):
                 date=time
             )
             # DEBUG:
-            response = {'content': '<function=query>{"query": "FIN:BTC-USD"} </function>', 'function_call': {'name': 'query', 'parameter': {'query': 'FIN:BTC-USD'}}}
+            # response = {'content': '<function=query>{"query": "FIN:BTC-USD"} </function>', 'function_call': {'name': 'query', 'parameter': {'query': 'FIN:BTC-USD'}}}
             message = response
             if 'function_call' in message:
-                action, act_message=self.act(message["function_call"])
+                func_list = message['function_call']
+                if not isinstance(func_list, list):
+                    func_list = [func_list]
+                for func in func_list:
+                    action, act_message=self.act(func)
+                    messages.append(act_message)
             else: 
                 action=''
                 act_message=self.message('system',f'You did not call any function, you must call one function in your reply. Try again.')
+                messages.append(act_message)
             # messages.append(message)
-            messages.append(act_message)
             # if self.verbose: self.show_message(message)
             if self.verbose: self.show_message(act_message)
             second_response = self.llm_model.inference(

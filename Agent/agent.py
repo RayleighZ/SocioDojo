@@ -74,7 +74,7 @@ class BaseAgent:
         res=self.registry['probe'](q,info)  
         if 'ERROR' in res: return res
         if q[:4]=='FIN:': 
-            if 'information' in res:
+            if 'information' in res and 'info' in res['information']:
                 del res['information']['info']  # not needed, icode info already cover
                 if len(res['information'])==1: del res['information']
         return res

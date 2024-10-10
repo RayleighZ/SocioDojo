@@ -192,10 +192,20 @@ class LlamaAssistant(BaseLlamaAssistant):
     def handle_query_list(self,message,messages): # search api already set time in world
         done=False
         query=None
+        def args_safe_calling(func_name, parameter_name, parameter, func):
+            if parameter_name in parameter:
+                return func(parameter[parameter_name]), parameter[parameter_name]
+            else:
+                return f'ERROR: Parameter {parameter_name} not found when calling function {func_name}', 'no valid query'
         if "function_call" in message:
             if len(message['function_call']) == 1:
                 message['function_call'] = [message['function_call']]
-            for f in message["function_call"]:
+            function_list = message["function_call"]
+            if not isinstance(function_list, list):
+                function_list = [function_list]
+            for f in function_list:
+                print('========== in handle query list ==========')
+                print(f)
                 fn=f['name'].lower()
                 ok=False
                 try:
@@ -206,27 +216,34 @@ class LlamaAssistant(BaseLlamaAssistant):
                     if fn=='done': 
                         done=True
                         message=self.message('system','You have finished the query.')
-                    elif fn=='wikisearch': 
-                        ret=self.wikisearch(args['query'])
-                        query=args['query']
+                    elif fn=='wikisearch':
+                        ret, query=args_safe_calling('wikisearch', 'query', args, self.wikisearch)
+                        # ret=self.wikisearch(args['query'])
+                        # query=args['query']
                     elif fn=='googlesearch': 
-                        ret=self.googlesearch(args['query'])
-                        query=args['query']
+                        # ret=self.googlesearch(args['query'])
+                        # query=args['query']
+                        ret, query=args_safe_calling('googlesearch', 'query', args, self.googlesearch)
                     elif fn=='gkgsearch': 
-                        ret=self.gkgsearch(args['query'])
-                        query=args['query']
+                        # ret=self.gkgsearch(args['query'])
+                        # query=args['query']
+                        ret, query = args_safe_calling('gkgsearch', 'query', args, self.gkgsearch)
                     elif fn=='probe': 
-                        ret=self.probe(args['icode'])
-                        query=args['icode']
+                        # ret=self.probe(args['icode'])
+                        # query=args['icode']
+                        ret, query = args_safe_calling('probe', 'icode', args, self.probe)
                     elif fn=='askdb': 
-                        ret=self.askdb(args['query'])
-                        query=args['query']
+                        # ret=self.askdb(args['query'])
+                        # query=args['query']
+                        ret, query = args_safe_calling('askdb', 'query', args, self.askdb)
                     elif fn=='query_icode': 
-                        ret=self.query_icode(args['query'])
-                        query=args['query']
+                        # ret=self.query_icode(args['query'])
+                        # query=args['query']
+                        ret, query = args_safe_calling('query_icode', 'query', args, self.query_icode)
                     elif fn=='get_metadata':
-                        ret=self.get_metadata(args['icode'])
-                        query=args['icode']
+                        # ret=self.get_metadata(args['icode'])
+                        # query=args['icode']
+                        ret, query = args_safe_calling('get_metadata', 'icode', args, self.get_metadata)
                     else: message=self.message('system',f'Invalid function call: {fn}. Valid function calls are wikisearch, googlesearch, gkgsearch, probe, askdb, query_icode.')
                 if query is not None: 
                     messages.append(self.message('system',f'You are querying {fn}: {query}'))
@@ -264,6 +281,9 @@ class LlamaAssistant(BaseLlamaAssistant):
         messages.append(message)
         message['role'] = 'assistant'
         if self.verbose: self.show_message(message)
+        # DEBUG
+        print('==================== after ask assistant =====================')
+        print(messages)
         return messages,content
         
         
