@@ -1,3 +1,5 @@
+import pdb
+
 import openai
 import random
 import sys,os
@@ -12,6 +14,7 @@ from Agent.utils import pjoin,pexist,makedirs,save_json,load_json,get_icodes
 from Agent.actuator import ChatActuator, LlamaActuator
 from Agent.assistant import ChatAssistant, LlamaAssistant
 from Agent.analyst import ChatAnalyst, LlamaAnalyst
+from transformers import LlamaForCausalLM
 
 
 def build_agent(root,savename,apikeys,config,debug_mode=False):
@@ -176,20 +179,22 @@ class LlamaAgent(BaseAgent):
 
     def setup(self):
         print('Setup Actuator...')
+        model_path = self.config['model_path']
+        model = LlamaForCausalLM.from_pretrained(model_path, load_in_4bit=True)
         self.actuator=LlamaActuator(self.root,self.trade,self.state,self.probe,self.get_metadata, model_path=self.config['model_path'],
                                    model_name=self.config['assistant_model'],verbose=self.config['actuator_verbose'],
                                    limit=self.config['actuator_limit'],ruleset=self.ruleset,
-                                   temperature=self.config['temperature'],top_p=self.config['top_p'],)
+                                   temperature=self.config['temperature'],top_p=self.config['top_p'],model=model)
         print('Setup Assistant...')
         self.assistant=LlamaAssistant(self.root,self.query,self.probe,self.actuator.query,self.get_metadata,
                                      model_path=self.config['model_path'],model_name=self.config['assistant_model'],
                                      verbose=self.config['assistant_verbose'],limit=self.config['assistant_limit'],
-                                     temprature=self.config['temperature'],top_p=self.config['top_p'])
+                                     temprature=self.config['temperature'],top_p=self.config['top_p'],model=model)
         print('Setup Analyst...')
         self.analyst=LlamaAnalyst(self.actuator,self.assistant,model_path=self.config['model_path'],model_name=self.config['analyst_model'],
                                  verbose=self.config['analyst_verbose'],limit=self.config['analyst_limit'],debug_mode=self.debug_mode,
                                  ruleset=self.ruleset,analyse_fn=self.config['analyse_fn'],second_response=self.config['second_response'],
-                                 serp_apikey=self.apikeys['serp_apikey'],temprature=self.config['temperature'],top_p=self.config['top_p'])
+                                 serp_apikey=self.apikeys['serp_apikey'],temprature=self.config['temperature'],top_p=self.config['top_p'],model=model)
     
     def sense(self, message):
         record=self.analyst(message) 
@@ -227,6 +232,7 @@ class ChatAgent(BaseAgent):
         
 
     def setup(self):
+        pdb.set_trace()
         print('Setup Actuator...')
         self.actuator=ChatActuator(self.root,self.trade,self.state,self.probe,self.get_metadata, self.apikeys['openai_apikey'],
                                    model_name=self.config['assistant_model'],verbose=self.config['actuator_verbose'],

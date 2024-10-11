@@ -2,4 +2,5 @@ Corpus/
 Ckpts/
 archive/
 Agent/db/
+*.pkl
 __pycache__

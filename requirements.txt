@@ -13,3 +13,10 @@ pytrends
 selenium
 secedgar
 wikitextparser
+sentence-transformers==2.2.2
+transformers
+google-search-results
+bitsandbytes
+pathos
+pandas_datareader
+langchain_community

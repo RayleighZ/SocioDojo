@@ -60,9 +60,9 @@ def filter_function(response: str) -> list:
     return function_list
 
 class Llama318BAgent(BaseLLMAget):
-    def __init__(self, temperature: float, top_p: int, model_path: str):
+    def __init__(self, temperature: float, top_p: int, model_path: str, model):
         super().__init__(temperature, top_p)
-        self.model = LlamaForCausalLM.from_pretrained(model_path, load_in_4bit=True)
+        self.model = model
         self.tokenizer = AutoTokenizer.from_pretrained(model_path, load_in_4bit=True)
         self.terminators = [
             self.tokenizer.eos_token_id,

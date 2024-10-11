@@ -4,9 +4,11 @@ import uuid
 import os,shutil
 
 from Env.world import build_world
+print('a')
 from Agent.agent import build_agent
+print('b')
 from Env.utils import pexist,pjoin,makedirs,save_json,load_json
-
+print('c')
 from config import sawi_worldconfig,base_config,base_agentconfig
 
 
@@ -116,10 +118,10 @@ def run_ca(savename=None,analyse_fn='',debug_mode=False):
         'assistant_limit': 2,
         'temperature': 0.2,
         'top_p': 0.1,
-        'analyst_model': 'llama3.1_8b',
-        'actuator_model': 'llama3.1_8b',
-        'assistant_model': 'llama3.1_8b',
-        'model_path': '/work/zhangyu/dev/LLM-models/Llama-3.1-8B-Instruct',
+        'analyst_model': 'llama3.1_70b',
+        'actuator_model': 'llama3.1_70b',
+        'assistant_model': 'llama3.1_70b',
+        'model_path': '/home/tione/notebook/rayleighz_prj/LLM-models/Llama-3.1-70B-Instruct',
         'analyst_verbose': True,
         'actuator_verbose': False,
         'assistant_verbose': False,
@@ -135,5 +137,6 @@ def run_ca(savename=None,analyse_fn='',debug_mode=False):
     end_time='2023-08-01'
     run.run(end_time)
 
-run_ca('demo')
+print('running')
+run_ca('llama3.1_70B')
 # test_sawi()
