@@ -137,13 +137,17 @@ class BaseLlamaAnalyst:
     def __call__(self,info,data=None): # sequential process news
         self.record={'analyst':[],'assistant':[],'actuator':[]}
         time=str(info["time"])
+        total_news = ''
+        total_metadata = ''
         for n in info['news']:
             news=f'{n["datetime"]} {n["source"]}:\n\n{n["message"]}\n\n\n'
+            total_news = f'{total_news}{news}'
             metadata=parse_md(n['metadata'])
-            send,analysis=self.analyse(news,metadata,time)
-            if send: 
-                actuator_messages=self.actuate(analysis,time)
-                self.record['actuator'].append(actuator_messages)
+            total_metadata=f'{total_metadata} {metadata}'
+        send,analysis=self.analyse(total_news,total_metadata,time)
+        if send:
+            actuator_messages=self.actuate(analysis,time)
+            self.record['actuator'].append(actuator_messages)
         return self.record
 
 
@@ -193,6 +197,7 @@ class LlamaAnalyst(BaseLlamaAnalyst):
             return True
         messages=copy.deepcopy(messages)
         messages.append(self.message('system',PROMPT.whether_send))
+        print('======================================================== in whether send function ========================================================')
         response = self.llm_model.inference(
             messages=messages,
             device='cuda:0',
@@ -318,7 +323,7 @@ class LlamaAnalyst(BaseLlamaAnalyst):
             # pdb.set_trace()
             done,messages=self.handle_call(message,messages,time)
             if done: break
-            print('======================================================== in whether read function (second) ========================================================')
+            print('======================================================== in do analysis function (second) ========================================================')
             if self.second_response:
                 second_response = self.llm_model.inference(
                     messages=messages,

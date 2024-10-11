@@ -288,6 +288,8 @@ class BaseLlamaActuator:
             instructions: A series of tradings instructions, each line is one instruction, there are two kinds of instructions with format "BUY [ICode] [amount]", and "SELL [ICode] [amount]", for example: BUY FIN:AAPL 2000\nSELL FIN:GOOG 1000\n
         """
         todo=[]
+        print('================================================ trading ================================================')
+        print(f'instructions: {instructions}')
         for instruction in instructions.split('\n'):
             if instruction=='': continue
             try:

@@ -15,6 +15,8 @@ end_tag => `</function>`
 
 Here is an example,
 <function=example_function_name>{"example_name": "example_value"}</function>
+
+NOTICE: you can call at most ONE function in a single response.
 '''
 
 reaction_cache = {}

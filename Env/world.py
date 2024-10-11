@@ -1,5 +1,7 @@
 import os,time
 import functools as ft
+import pdb
+
 import pandas as pd
 from datetime import timedelta
 import numpy as np
@@ -148,12 +150,18 @@ class SingleAgentWorldICode(WorldEnv):
     def move(self,debug_mode,filter_fn=filter_by_category): # filter_fn: True if pass the filter 
         while True:
             ret=self._move(debug_mode)
+            processed_ret = []
+            for r in ret:
+                if isinstance(r, list):
+                    processed_ret.extend(r)
+                else:
+                    processed_ret.append(r)
             newret=[]
-            for i in ret:
-                if 'ERROR' in ret or filter_fn is None or filter_fn(i): 
+            for i in processed_ret:
+                if 'ERROR' in processed_ret or filter_fn is None or filter_fn(i):
                     newret.append(i) # error shown, or no filter, or any news pass the filter
             if len(newret)>0: break
-        return ret
+        return processed_ret
 
     def save(self):
         self.broker.save()

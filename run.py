@@ -4,11 +4,8 @@ import uuid
 import os,shutil
 
 from Env.world import build_world
-print('a')
 from Agent.agent import build_agent
-print('b')
 from Env.utils import pexist,pjoin,makedirs,save_json,load_json
-print('c')
 from config import sawi_worldconfig,base_config,base_agentconfig
 
 
@@ -75,7 +72,7 @@ def test_sawi(savename='test',ruleset=[]):
     config['ruleset']=[]
     worldconfig=copy.deepcopy(sawi_worldconfig)
     worldconfig['default_channels']=['TTT']#,'WSJ','NYT']
-    worldconfig['period']=0 #300
+    worldconfig['period']=86400 # step forward a day each time
     worldconfig['ruleset']=config['ruleset']
     config['worldconfig']=worldconfig
     agentconfig=copy.deepcopy(base_agentconfig)
@@ -104,7 +101,7 @@ def run_ca(savename=None,analyse_fn='',debug_mode=False):
     config['ruleset']=['nodt']
     worldconfig=copy.deepcopy(sawi_worldconfig)
     worldconfig['default_channels']=['TTT']
-    worldconfig['period']=0 #300
+    worldconfig['period']=43200
     worldconfig['ruleset']=config['ruleset']
     config['worldconfig']=worldconfig
 
@@ -121,7 +118,7 @@ def run_ca(savename=None,analyse_fn='',debug_mode=False):
         'analyst_model': 'llama3.1_70b',
         'actuator_model': 'llama3.1_70b',
         'assistant_model': 'llama3.1_70b',
-        'model_path': '/home/tione/notebook/rayleighz_prj/LLM-models/Llama-3.1-70B-Instruct',
+        'model_path': '/home/tione/notebook/rayleighz_prj/LLM-models/Llama-3.1-8B-Instruct',
         'analyst_verbose': True,
         'actuator_verbose': False,
         'assistant_verbose': False,
@@ -138,5 +135,5 @@ def run_ca(savename=None,analyse_fn='',debug_mode=False):
     run.run(end_time)
 
 print('running')
-run_ca('llama3.1_70B')
+run_ca('llama3.1_8B')
 # test_sawi()

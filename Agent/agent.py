@@ -232,7 +232,6 @@ class ChatAgent(BaseAgent):
         
 
     def setup(self):
-        pdb.set_trace()
         print('Setup Actuator...')
         self.actuator=ChatActuator(self.root,self.trade,self.state,self.probe,self.get_metadata, self.apikeys['openai_apikey'],
                                    model_name=self.config['assistant_model'],verbose=self.config['actuator_verbose'],
