@@ -95,14 +95,14 @@ class BaseLlamaAssistant:
         query_fn (ep: query): function to query the tools, mainly internet search engines
         probe_fn (ep: probe): function to probe the historical time series and related info through broker
     """
-    def __init__(self,root,query_fn,probe_fn,query_icode,get_metadata,model_path,temprature,top_p,model,limit=5):
+    def __init__(self,root,query_fn,probe_fn,query_icode,get_metadata,model_path,temprature,top_p,limit=5):
         self.root=root
         self.query_fn=query_fn
         self.probe_fn=probe_fn
         self.query_icode=query_icode # str -> str
         self.get_metadata=get_metadata # str -> dict: name, info
         self.limit=limit
-        self.llm_model = Llama318BAgent(temprature, top_p, model_path, model)
+        self.llm_model = Llama318BAgent(temprature, top_p, model_path)
         self.db=KBDB(root)
 
     def ask(self,query,time,limit=5):
@@ -114,9 +114,9 @@ class BaseLlamaAssistant:
 
 
 class LlamaAssistant(BaseLlamaAssistant):
-    def __init__(self,root,query_fn,probe_fn,query_icode,get_metadata,model_path,model,
+    def __init__(self,root,query_fn,probe_fn,query_icode,get_metadata,model_path,
                  model_name="Llama3.1_8B",verbose=False,limit=5,temprature=0.2,top_p=0.1):
-        super().__init__(root,query_fn,probe_fn,query_icode,get_metadata,model_path,temprature,top_p,model,limit)
+        super().__init__(root,query_fn,probe_fn,query_icode,get_metadata,model_path,temprature,top_p,limit)
         self.model_name=model_name
         self.verbose=verbose
         self.temprature=temprature
@@ -190,6 +190,8 @@ class LlamaAssistant(BaseLlamaAssistant):
         done=False
         query=None
         def args_safe_calling(func_name, parameter_name, parameter, func):
+            if func_name in ['wikisearch', 'googlesearch']:
+                return f'ERROR: function {func_name} is not supported by system, please call other functions to get information', "no valid query"
             if parameter_name in parameter:
                 return func(parameter[parameter_name]), parameter[parameter_name]
             else:

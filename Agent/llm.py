@@ -1,8 +1,6 @@
-import transformers
 
 from transformers import AutoTokenizer, LlamaForCausalLM
 import json
-import hashlib
 
 function_call_exp = '''
 If a you choose to call a function, the function calling part of reply should in the following format:
@@ -18,9 +16,6 @@ Here is an example,
 
 NOTICE: you can call at most ONE function in a single response.
 '''
-
-reaction_cache = {}
-import pickle
 
 DEBUG = True
 
@@ -47,7 +42,6 @@ def filter_function(response: str) -> list:
         # print(f'f is {f}')
         if not f.startswith('='):
             continue
-        function = {}
         function_name = f.split('>')[0][1:]
         param_str = '{' + f.split('{')[-1].split('}')[0] + '}'
         try:
@@ -62,9 +56,14 @@ def filter_function(response: str) -> list:
     return function_list
 
 class Llama318BAgent(BaseLLMAget):
-    def __init__(self, temperature: float, top_p: int, model_path: str, model):
+
+    llm = None
+
+    def __init__(self, temperature: float, top_p: int, model_path: str):
         super().__init__(temperature, top_p)
-        self.model = model
+        if Llama318BAgent.llm is None:
+            Llama318BAgent.llm = LlamaForCausalLM.from_pretrained(model_path, load_in_4bit=True)
+        self.model = Llama318BAgent.llm
         self.tokenizer = AutoTokenizer.from_pretrained(model_path, load_in_4bit=True)
         self.terminators = [
             self.tokenizer.eos_token_id,
@@ -84,14 +83,15 @@ class Llama318BAgent(BaseLLMAget):
             add_generation_prompt=True,
             return_tensors='pt'
         )
-        input_hash = inputs.numpy().tobytes()
+        inputs = inputs.to('cuda')
         sequences = self.model.generate(
             inputs,
             do_sample=True,
+            use_cache=True,
             top_p=self.top_p,
             eos_token_id=self.terminators,
             temperature=self.temperature,
-            max_new_tokens=500
+            max_new_tokens=500,
         )
         response = sequences[0][inputs.shape[-1]:]
         response = self.tokenizer.decode(response, skip_special_tokens=True)
@@ -104,7 +104,4 @@ class Llama318BAgent(BaseLLMAget):
             result['function_call'] = function_list[0]
         elif len(function_list) != 0:
             result['function_call'] = function_list
-        reaction_cache[f'{input_hash}'] = result
-        with open('./reaction_cache.pkl', 'wb') as f:
-            pickle.dump(reaction_cache, f)
         return result

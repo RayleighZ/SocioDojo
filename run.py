@@ -101,7 +101,7 @@ def run_ca(savename=None,analyse_fn='',debug_mode=False):
     config['ruleset']=['nodt']
     worldconfig=copy.deepcopy(sawi_worldconfig)
     worldconfig['default_channels']=['TTT']
-    worldconfig['period']=43200
+    worldconfig['period']=86400
     worldconfig['ruleset']=config['ruleset']
     config['worldconfig']=worldconfig
 
@@ -135,5 +135,5 @@ def run_ca(savename=None,analyse_fn='',debug_mode=False):
     run.run(end_time)
 
 print('running')
-run_ca('llama3.1_8B')
+run_ca('llama3.1_8B_0.5day')
 # test_sawi()
