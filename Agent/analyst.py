@@ -96,7 +96,7 @@ class BaseLlamaAnalyst:
         listen_fn: bindpoint of listen, actively config channels to listen
         watch_fn: now can be implemented by SYS query, actively watch the time series or sources
     """
-    def __init__(self,actuator,assistant,model_path,temperature,top_p,verbose=False,
+    def __init__(self,actuator,assistant,model_path,model_name,save_path,temperature,top_p,verbose=False,
                  listen_fn=None,watch_fn=None,ruleset=[]):
         self.listen_fn=listen_fn
         self.watch_fn=watch_fn
@@ -104,7 +104,7 @@ class BaseLlamaAnalyst:
         self.assistant=assistant
         self.verbose=verbose
         self.ruleset=ruleset
-        self.llm_model = Llama318BAgent(temperature, top_p, model_path)
+        self.llm_model = Llama318BAgent(model_name, save_path, temperature, top_p, model_path)
         self.role = 'analyst'
         if 'track' in self.ruleset:
             self.tracklist=self.actuator.tracklist
@@ -160,9 +160,10 @@ class LlamaAnalyst(BaseLlamaAnalyst):
             actuator,
             assistant,
             model_path,
+            save_path,
             verbose=False,
             analyse_fn='hnp',
-            model_name='Llama3.1_8B',
+            model_name='Llama3.1_8B_Analyst',
             limit=5,
             debug_mode=False,
             ruleset=[],
@@ -171,7 +172,7 @@ class LlamaAnalyst(BaseLlamaAnalyst):
             temprature=0.2,
             top_p=0.1,
         ):
-        super().__init__(actuator,assistant,model_path,temprature,top_p,verbose,ruleset=ruleset)
+        super().__init__(actuator,assistant,model_path,model_name,save_path,temprature,top_p,verbose,ruleset=ruleset)
         self.model_name=model_name
         self.limit=limit
         self.debug_mode=debug_mode
@@ -341,7 +342,8 @@ class LlamaAnalyst(BaseLlamaAnalyst):
         output = self.llm_model.inference(
             messages=messages,
             device='cuda:0',
-            date=self.time
+            date=self.time,
+            feat=True
         )
         message=output
         content=message["content"]

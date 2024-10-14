@@ -135,5 +135,5 @@ def run_ca(savename=None,analyse_fn='',debug_mode=False):
     run.run(end_time)
 
 print('running')
-run_ca('llama3.1_8B_0.5day')
+run_ca('llama3.1_8B_0.5day_save_history')
 # test_sawi()

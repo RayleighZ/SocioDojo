@@ -1,6 +1,6 @@
-
 from transformers import AutoTokenizer, LlamaForCausalLM
 import json
+import os
 
 function_call_exp = '''
 If a you choose to call a function, the function calling part of reply should in the following format:
@@ -29,7 +29,7 @@ class BaseLLMAget:
         - role: system or user
         - content: prompt to role
     '''
-    def inference(self, messages: list, device: str, date: str, function_call: list):
+    def inference(self, messages: list, device: str, date: str, function_call: list = [], feat: float = False):
         raise NotImplementedError('LLMAgent pipeline not implemented')
 
 
@@ -55,11 +55,12 @@ def filter_function(response: str) -> list:
         function_list.append(function)
     return function_list
 
+
 class Llama318BAgent(BaseLLMAget):
 
     llm = None
 
-    def __init__(self, temperature: float, top_p: int, model_path: str):
+    def __init__(self, name: str, save_path: str, temperature: float, top_p: int, model_path: str):
         super().__init__(temperature, top_p)
         if Llama318BAgent.llm is None:
             Llama318BAgent.llm = LlamaForCausalLM.from_pretrained(model_path, load_in_4bit=True)
@@ -69,8 +70,11 @@ class Llama318BAgent(BaseLLMAget):
             self.tokenizer.eos_token_id,
             self.tokenizer.convert_tokens_to_ids("<|eot_id|>")
         ]
+        self.name = name
+        self.save_path = save_path
+        self.save_count = 0
 
-    def inference(self, messages: list, device: str, date: str, function_call: list = []) -> dict:
+    def inference(self, messages: list, device: str, date: str, function_call: list = [], feat = False) -> dict:
         input_message = []
         knowledge_cut = {'role': 'system', 'content': f'Cutting Knowledge Date: {date}, and you should only make decisions based on the provided information'}
         input_message.append(knowledge_cut)
@@ -104,4 +108,15 @@ class Llama318BAgent(BaseLLMAget):
             result['function_call'] = function_list[0]
         elif len(function_list) != 0:
             result['function_call'] = function_list
+        if feat:
+            save_message_response_pair = {
+                'message': input_message,
+                'response': response
+            }
+            save_root = f'{self.save_path}/ResponseHistory/{self.name}'
+            if not os.path.exists(save_root):
+                os.makedirs(save_root)
+            with open(f'{save_root}/{self.save_count}.json', 'w') as cache_json:
+                json.dump(save_message_response_pair, cache_json)
+                self.save_count += 1
         return result

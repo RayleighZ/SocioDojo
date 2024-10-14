@@ -258,7 +258,8 @@ class Account:
         self.create_hp=ft.partial(HyperPortfolio,root=root,oneprobe=oneprobe,ruleset=ruleset)
         self.cash=init_cash 
         self.root=root
-    
+        self.save_count=0
+
     def new_portfolio(self,name,time):
         if name in self.hps: return ERRREP+' hyper portfolio name already used'
         self.hps[name]=self.create_hp(name,init_time=time)
@@ -333,7 +334,8 @@ class Account:
         ckpt=self.json()
         path=os.path.join(self.root,'Ckpts',savename,'Account')
         if not os.path.exists(path): os.makedirs(path)
-        with open(os.path.join(path,self.name+'.json'),'w') as f: json.dump(ckpt,f)
+        with open(os.path.join(path,f'{self.name}-{self.save_count}.json'),'w') as f: json.dump(ckpt,f)
+        self.save_count += 1
 
     def load(self,savename):
         path=os.path.join(self.root,'Ckpts',savename,'Account',self.name+'.json')
@@ -351,7 +353,6 @@ class Account:
                 self.hps[i].assets[code]=json2asset(hp['assets'][code])
 
 
-
 class Broker:
     def __init__(self,root,savename,init_time,uniquery,oneprobe,ruleset):
         self.uq=uniquery
@@ -362,6 +363,7 @@ class Broker:
         self.root=root
         self.savename=savename
         self.ruleset=ruleset
+        self.account_history={}
         if 'track' in self.ruleset:
             tracklist=get_tracklist(root)
             self.tracklist={}
@@ -375,6 +377,7 @@ class Broker:
         if name in self.accounts: return ERRREP+' account name already exist'
         self.accounts[name]=self.create_account(name)
         self.accounts[name].new_portfolio('default',self.time)
+        self.account_history[name]=[]
 
     def query(self,q,info=False): # query an asset now, HEAD:QUERY, this gives information about the ticker
         prior=self.op.probe(q,self.time) 
@@ -416,6 +419,7 @@ class Broker:
             accounts={}
             for i in self.accounts:
                 accounts[i]=self.account_report(i,account_detail)
+                self.account_history[i].append(accounts[i])
             info['accounts']=accounts
         return info
     

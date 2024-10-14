@@ -19,6 +19,7 @@ from langchain.memory import ConversationBufferMemory
 import chromadb
 from chromadb.config import Settings
 from chromadb.utils import embedding_functions
+
 from Agent.llm import Llama318BAgent
 try:
     from Agent.utils import pexist,pjoin,readtxt,get_icodes,get_tracklist
@@ -207,14 +208,14 @@ class BaseLlamaActuator:
         state_fn (ep: state): function to get the current state of the assets including account, portfolio, etc.
     """
     def __init__(self,root,trade_fn,state_fn,probe_fn,get_metadata_fn,
-                 model_path,temperature,top_p,verbose=False,simu_mode=False,ruleset=[]):
+                 model_path,model_name,save_path,temperature,top_p,verbose=False,simu_mode=False,ruleset=[]):
         self.root=root
         self.trade_fn=trade_fn
         self.state_fn=state_fn
         self.probe_fn=probe_fn
         self.get_metadata_fn=get_metadata_fn
         self.icb=ICodeDB(root)
-        self.llm_model = Llama318BAgent(temperature, top_p, model_path)
+        self.llm_model = Llama318BAgent(model_name, save_path, temperature, top_p, model_path)
         self.verbose=verbose
         self.simu_mode=simu_mode
         self.ruleset=ruleset
@@ -462,8 +463,9 @@ class LlamaActuator(BaseLlamaActuator):
             probe_fn,
             get_metadata_fn,
             model_path,
+            save_path,
             verbose=False,
-            model_name="gpt-3.5-turbo-16k",
+            model_name="Llama3.1_8B_Actuator",
             temperature=0.2,
             top_p=0.1,
             request_timout=120,
@@ -472,7 +474,7 @@ class LlamaActuator(BaseLlamaActuator):
             ruleset=[],
         ):
         super().__init__(root,trade_fn,state_fn,probe_fn,get_metadata_fn,
-                         model_path,temperature,top_p,verbose,simu_mode,ruleset)
+                         model_path,model_name,save_path,temperature,top_p,verbose,simu_mode,ruleset)
         self.model_name=model_name
         self.icodelist=get_icodes(root)
         self.limit=limit
@@ -566,7 +568,8 @@ class LlamaActuator(BaseLlamaActuator):
                 messages=messages,
                 device='cuda:0',
                 function_call=PROMPT.functions,  # auto is default, but we'll be explicit 
-                date=time
+                date=time,
+                feat=True
             )
             # DEBUG:
             # response = {'content': '<function=query>{"query": "FIN:BTC-USD"} </function>', 'function_call': {'name': 'query', 'parameter': {'query': 'FIN:BTC-USD'}}}
