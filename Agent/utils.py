@@ -4,6 +4,7 @@ import re
 
 from serpapi import GoogleSearch
 from fredapi import Fred
+from duckduckgo_search import DDGS
 
 try:
     from .const import Buggy
@@ -76,29 +77,31 @@ def get_tracklist(root):
 
 def google(question,serpapi_key,datetime):
     dt=datetime.strftime('%m/%d/%Y')
-    params = {
-        "api_key": serpapi_key,
-        "engine": "google",
-        "q": question,
-        "google_domain": "google.com",
-        "gl": "us",
-        "hl": "en",
-        "tbs": f"cdr:1,cd_max:{dt}"
-    }
-    with io.capture_output() as captured: #disables prints from GoogleSearch
-        search = GoogleSearch(params)
-        res = search.get_dict()
-    if 'answer_box' in res.keys() and 'answer' in res['answer_box'].keys():
-        toret = res['answer_box']['answer']
-    elif 'answer_box' in res.keys() and 'snippet' in res['answer_box'].keys():
-        toret = res['answer_box']['snippet']
-    elif 'answer_box' in res.keys() and 'snippet_highlighted_words' in res['answer_box'].keys():
-        toret = res['answer_box']["snippet_highlighted_words"][0]
-    elif 'snippet' in res["organic_results"][0].keys():
-        toret= res["organic_results"][0]['snippet'] 
-    else:
-        toret = None
-    return toret
+    result = DDGS().text(question, timelimit=dt, proxy='https://127.0.0.1:7897')
+    # params = {
+    #     "api_key": serpapi_key,
+    #     "engine": "google",
+    #     "q": question,
+    #     "google_domain": "google.com",
+    #     "gl": "us",
+    #     "hl": "en",
+    #     "tbs": f"cdr:1,cd_max:{dt}"
+    # }
+    return result
+    # with io.capture_output() as captured: #disables prints from GoogleSearch
+    #     search = GoogleSearch(params)
+    #     res = search.get_dict()
+    # if 'answer_box' in res.keys() and 'answer' in res['answer_box'].keys():
+    #     toret = res['answer_box']['answer']
+    # elif 'answer_box' in res.keys() and 'snippet' in res['answer_box'].keys():
+    #     toret = res['answer_box']['snippet']
+    # elif 'answer_box' in res.keys() and 'snippet_highlighted_words' in res['answer_box'].keys():
+    #     toret = res['answer_box']["snippet_highlighted_words"][0]
+    # elif 'snippet' in res["organic_results"][0].keys():
+    #     toret= res["organic_results"][0]['snippet']
+    # else:
+    #     toret = None
+    # return toret
 
 
 

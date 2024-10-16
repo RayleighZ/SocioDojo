@@ -338,7 +338,10 @@ class Account:
         self.save_count += 1
 
     def load(self,savename):
-        path=os.path.join(self.root,'Ckpts',savename,'Account',self.name+'.json')
+        account_log_path = os.path.join(self.root,'Ckpts',savename,'Account')
+        self.save_count = len(os.listdir(account_log_path)) - 1
+        path=os.path.join(self.root,'Ckpts',savename,'Account',self.name+f'-{self.save_count}.json')
+        print(f'account path is {path}')
         with open(path,'r') as f: ckpt=json.load(f)
         hps=ckpt['protfolios']
         self.cash=ckpt['cash']

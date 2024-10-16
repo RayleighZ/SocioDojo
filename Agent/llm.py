@@ -7,7 +7,7 @@ If a you choose to call a function, the function calling part of reply should in
 <{start_tag}={function_name}>{parameters}{end_tag}
 where
 
-start_tag => `<function`
+start_tag => `function`
 parameters => a JSON dict with the function argument name as key and function argument value as value.
 end_tag => `</function>`
 
@@ -63,9 +63,9 @@ class Llama318BAgent(BaseLLMAget):
     def __init__(self, name: str, save_path: str, temperature: float, top_p: int, model_path: str):
         super().__init__(temperature, top_p)
         if Llama318BAgent.llm is None:
-            Llama318BAgent.llm = LlamaForCausalLM.from_pretrained(model_path, load_in_4bit=True)
+            Llama318BAgent.llm = LlamaForCausalLM.from_pretrained(model_path, load_in_4bit=False).to('cuda')
         self.model = Llama318BAgent.llm
-        self.tokenizer = AutoTokenizer.from_pretrained(model_path, load_in_4bit=True)
+        self.tokenizer = AutoTokenizer.from_pretrained(model_path, load_in_4bit=False)
         self.terminators = [
             self.tokenizer.eos_token_id,
             self.tokenizer.convert_tokens_to_ids("<|eot_id|>")
@@ -77,11 +77,12 @@ class Llama318BAgent(BaseLLMAget):
     def inference(self, messages: list, device: str, date: str, function_call: list = [], feat = False) -> dict:
         input_message = []
         knowledge_cut = {'role': 'system', 'content': f'Cutting Knowledge Date: {date}, and you should only make decisions based on the provided information'}
+        input_message.extend(messages[0:-2])
         input_message.append(knowledge_cut)
         if len(function_call) != 0:
             function_call_message = {'role': 'system', 'content': f'you can choose to call folling functions if necessary: {function_call}, {function_call_exp}'}
             input_message.append(function_call_message)
-        input_message.extend(messages)
+        input_message.append(messages[-1])
         inputs = self.tokenizer.apply_chat_template(
             input_message,
             add_generation_prompt=True,

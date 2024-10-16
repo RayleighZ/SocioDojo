@@ -39,7 +39,7 @@ hypothesis_proof='''
 In order to make a convincing analysis, you should clearly state your hypothesis and you should provide proof to support your hypothesis:
 1. If your hypothesis can not be supported by the facts, knowledge, and information you have, you should seek help from another assistant agent in your team by calling the ask function.
 2. You should never make up facts, knowledge, or information, if you do not know, you should call the ask function to seek help from the assistant agent.
-3. The assistant agent will find evidence to support your hypothesis if you call the ask function and send the evidence to you. It can also search general information, facts, and knowledge for you, and information on an ICode.
+3. The assistant agent will find evidence to support your hypothesis if you call the ask function and send the evidence to you. It can also search general information, facts, and knowledge for you, and information on an ICode, do not ask someting like 'What are the current trends in the global economy?.'.
 4. The hypothesis can also be rejected by the evidence, in that case, you should give up the hypothesis and construct a new one.
 5. Your hypothesis may lack support for both acceptance and rejection, in that case, you can choose to insist on it as an intuition, but you should explain why you insist on it, or you can choose to give up it.
 6. When you are done, you should call the done function to finish the analysis.
@@ -57,7 +57,7 @@ Now, progressively analyze the given news, article, report, etc. in a multi-roun
 hnp_functions=[
     {
         "name": "ask",
-        "description": "Ask the assistant for help, find evidence to support the hypothesis, or search for the evidence, facts, knowledge, information, or data demanded by the analyst",
+        "description": "Ask the assistant for help, find evidence to support the hypothesis, or search for the evidence, facts, knowledge, information, or data demanded by the analyst, The questions you ask must be specific and derived from the input information; try to ask questions related to financial entities that appear in the news, do not ask someting like 'What are the current trends in the global economy?.'",
         "parameters": {
             "type": "object",
             "properties": {

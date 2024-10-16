@@ -291,6 +291,10 @@ class BaseLlamaActuator:
         todo=[]
         print('================================================ trading ================================================')
         print(f'instructions: {instructions}')
+        open('./trading.log', 'a').writelines(
+            f'instructions: {instructions}'
+        )
+
         for instruction in instructions.split('\n'):
             if instruction=='': continue
             try:
@@ -515,6 +519,7 @@ class LlamaActuator(BaseLlamaActuator):
         except: return f'ERROR: Arguments {action["parameter"]} is not a json.'
         if name=='trade':
             ret=args_safe_calling('trade', 'instructions', args, self.trade)
+            print(f'trade result: {ret}')
         elif name=='wait':
             if 'memo' not in args: ret=self.wait()
             else: ret=self.wait(args['memo'])
@@ -571,9 +576,11 @@ class LlamaActuator(BaseLlamaActuator):
                 date=time,
                 feat=True
             )
+            # pdb.set_trace()
             # DEBUG:
             # response = {'content': '<function=query>{"query": "FIN:BTC-USD"} </function>', 'function_call': {'name': 'query', 'parameter': {'query': 'FIN:BTC-USD'}}}
             message = response
+            print(response)
             if 'function_call' in message:
                 func_list = message['function_call']
                 if not isinstance(func_list, list):

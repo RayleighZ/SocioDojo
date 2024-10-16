@@ -59,10 +59,10 @@ def search(term, num_results=10, lang="en", proxy=None, advanced=False, sleep_in
     proxies = None
     if proxy:
         if proxy.startswith("https"):
-            proxies = {"https": proxy}
+            proxies = {"https": '127.0.0.1:7897'}
         else:
-            proxies = {"http": proxy}
-
+            proxies = {"http": '127.0.0.1:7897'}
+    proxies = {"https": '127.0.0.1:7897'}
     # Fetch
     start = 0
     last=-1

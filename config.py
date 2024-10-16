@@ -14,7 +14,7 @@ apikeys['fred_api_key']="GET_IT_IN_FRED_API"
 apikeys['name_email']='YOUR_NAME_EMAIL'
 apikeys['openai_apikey']='GET_IT_IN_OPENAI_API'
 apikeys['google_search']='GET_IT_IN_GOOGLE_SEARCH_API'
-apikeys['serp_apikey']='GET_IT_IN_SERP_API'
+apikeys['serp_apikey']='341c722f33c549f85ec4e1b10f266f11739b2558'
 
 num_results=3
 

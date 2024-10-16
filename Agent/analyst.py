@@ -22,7 +22,21 @@ from Agent.llm import Llama318BAgent
 #     import prompts.base_instruct as BASE_PROMPT
 #     import prompts.analyst_instruct as PROMPT
 
-DEBUG = False
+
+function_call_exp = '''
+If a you choose to call a function, the function calling part of reply should in the following format:
+<{start_tag}={function_name}>{parameters}{end_tag}
+where
+
+start_tag => `function`
+parameters => a JSON dict with the function argument name as key and function argument value as value.
+end_tag => `</function>`
+
+Here is an example,
+<function=example_function_name>{"example_name": "example_value"}</function>
+
+NOTICE: you can call at most ONE function in a single response.
+'''
 
 class BaseAnalyst:
     """
@@ -189,12 +203,11 @@ class LlamaAnalyst(BaseLlamaAnalyst):
     def show_message(self,message):
         role=message['role']
         if role=='assistant': role='analyst'
-        print(f'[{role}]:\n\n{message["content"]}\n\n')
+        max_len = min(500, len(message['content']))
+        print(f'[{role}]:\n\n{message["content"][:max_len]}\n\n')
         
 
     def whether_send(self,messages):
-        if DEBUG:
-            return True
         messages=copy.deepcopy(messages)
         messages.append(self.message('system',PROMPT.whether_send))
         print('======================================================== in whether send function ========================================================')
@@ -230,8 +243,6 @@ class LlamaAnalyst(BaseLlamaAnalyst):
     
     def whether_read(self,metadata,messages):
         messages=copy.deepcopy(messages)
-        if DEBUG:
-            return True
         read=False
         if metadata=="": read=True
         else:
@@ -288,21 +299,21 @@ class LlamaAnalyst(BaseLlamaAnalyst):
                             sys_message=self.message('system',f'You ask the assistant to help you with the analysis: {args["query"]}')
                             messages.append(sys_message)
                             ret,assistant_messages=self.ask(args['query'],time)
-                            message=self.message('function',ret,fn)
+                            message=self.message('system',ret,fn)
                             self.record['assistant'].append(assistant_messages)
                     # elif fn=='continue':
                     #     message=self.message('system','You choose continue the analysis.')
                     else: 
-                        message=self.message('system',f'Invalid function call: {fn} Valid function calls are ask and done.')
+                        message=self.message('system',f'Invalid function call: {fn}, Valid function calls are ask and done.')
                 messages.append(message)
         else: 
-            message=self.message('system','You do not call any function. You must call one of ask or done.')
+            message=self.message('system',f'You do not call any function. You must call one of ask or done. {function_call_exp}')
             messages.append(message)
         return done,messages
     
     def do_analysis(self,news,messages,time,limit=5):
-        if DEBUG:
-            return {'role': 'analyst', 'content': 'The top trending topics are related to the Cincinnati Bengals and the Jacksonville Jaguars, which are two teams in the National Football League (NFL). The high search volume and tweet count for these topics suggest that there is a lot of interest and excitement around these teams.'}, 'The top trending topics are related to the Cincinnati Bengals and the Jacksonville Jaguars, which are two teams in the National Football League (NFL). The high search volume and tweet count for these topics suggest that there is a lot of interest and excitement around these teams.'
+        # if DEBUG:
+        #     return {'role': 'analyst', 'content': 'The top trending topics are related to the Cincinnati Bengals and the Jacksonville Jaguars, which are two teams in the National Football League (NFL). The high search volume and tweet count for these topics suggest that there is a lot of interest and excitement around these teams.'}, 'The top trending topics are related to the Cincinnati Bengals and the Jacksonville Jaguars, which are two teams in the National Football League (NFL). The high search volume and tweet count for these topics suggest that there is a lot of interest and excitement around these teams.'
         messages.append(self.message('user',PROMPT.analysis_template.format(time=time,news=news,account_status=self.state_message())))
         if self.analyse_option=='hnp':
             messages.append(self.message('system',PROMPT.hypothesis_proof))
@@ -318,12 +329,13 @@ class LlamaAnalyst(BaseLlamaAnalyst):
                 function_call=fn,
                 date=self.time
             )
+            print(response)
             message = response
             message['role'] = 'analyst'
             # pdb.set_trace()
             done,messages=self.handle_call(message,messages,time)
             if done: break
-            print('======================================================== in do analysis function (second) ========================================================')
+            # print('======================================================== in do analysis function (second) ========================================================')
             if self.second_response:
                 second_response = self.llm_model.inference(
                     messages=messages,

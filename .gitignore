@@ -4,3 +4,5 @@ archive/
 Agent/db/
 *.pkl
 __pycache__
+*.csv
+Tools/TS/

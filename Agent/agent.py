@@ -179,17 +179,17 @@ class LlamaAgent(BaseAgent):
 
     def setup(self):
         print('Setup Actuator...')
-        self.actuator=LlamaActuator(self.root,self.trade,self.state,self.probe,self.get_metadata, model_path=self.config['model_path'],
+        self.actuator=LlamaActuator(root=self.root,trade_fn=self.trade,state_fn=self.state,probe_fn=self.probe,get_metadata_fn=self.get_metadata, model_path=self.config['model_path'],
                                    model_name=self.config['assistant_model'],verbose=self.config['actuator_verbose'],
                                    limit=self.config['actuator_limit'],ruleset=self.ruleset,
                                    temperature=self.config['temperature'],top_p=self.config['top_p'],save_path=self.savedir)
         print('Setup Assistant...')
-        self.assistant=LlamaAssistant(self.root,self.query,self.probe,self.actuator.query,self.get_metadata,
+        self.assistant=LlamaAssistant(root=self.root,query_fn=self.query,probe_fn=self.probe,query_icode=self.actuator.query,get_metadata=self.get_metadata,
                                      model_path=self.config['model_path'],model_name=self.config['assistant_model'],
                                      verbose=self.config['assistant_verbose'],limit=self.config['assistant_limit'],
                                      temprature=self.config['temperature'],top_p=self.config['top_p'],save_path=self.savedir)
         print('Setup Analyst...')
-        self.analyst=LlamaAnalyst(self.actuator,self.assistant,model_path=self.config['model_path'],model_name=self.config['analyst_model'],
+        self.analyst=LlamaAnalyst(actuator=self.actuator,assistant=self.assistant,model_path=self.config['model_path'],model_name=self.config['analyst_model'],
                                  verbose=self.config['analyst_verbose'],limit=self.config['analyst_limit'],debug_mode=self.debug_mode,
                                  ruleset=self.ruleset,analyse_fn=self.config['analyse_fn'],second_response=self.config['second_response'],
                                  serp_apikey=self.apikeys['serp_apikey'],temprature=self.config['temperature'],top_p=self.config['top_p'],save_path=self.savedir)

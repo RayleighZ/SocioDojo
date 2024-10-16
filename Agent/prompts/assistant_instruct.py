@@ -28,62 +28,62 @@ Now, analyze the demand, and generate the query for the search engine or databas
 
 
 search_functions=[
-    # {
-    #     "name": "wikisearch",
-    #     "description": "Search the wikipedia",
-    #     "parameters": {
-    #         "type": "object",
-    #         "properties": {
-    #             "query": {
-    #                 "type": "string",
-    #                 "description": "The query keywords you used to search wikipedia",
-    #             },
-    #         },
-    #         "required": ["query"],
-    #     },
-    # },
-    # {
-    #     "name": "googlesearch",
-    #     "description": "Search the google",
-    #     "parameters": {
-    #         "type": "object",
-    #         "properties": {
-    #             "query": {
-    #                 "type": "string",
-    #                 "description": "The query keywords you used in google search",
-    #             },
-    #         },
-    #         "required": ["query"],
-    #     },
-    # },
-    # {
-    #     "name": "gkgsearch",
-    #     "description": "Search the google knowledge graph",
-    #     "parameters": {
-    #         "type": "object",
-    #         "properties": {
-    #             "query": {
-    #                 "type": "string",
-    #                 "description": "The entity you want to search in google knowledge graph",
-    #             },
-    #         },
-    #         "required": ["query"],
-    #     },
-    # },
-    # {
-    #     "name": "probe",
-    #     "description": "Get the recent historical time series and related information of a given ICode",
-    #     "parameters": {
-    #         "type": "object",
-    #         "properties": {
-    #             "icode": {
-    #                 "type": "string",
-    #                 "description": "The ICode to retrieve the historical time series and related information",
-    #             },
-    #         },
-    #         "required": ["icode"],
-    #     },
-    # },
+    {
+        "name": "wikisearch",
+        "description": "Search the wikipedia",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "query": {
+                    "type": "string",
+                    "description": "The query keywords you used to search wikipedia",
+                },
+            },
+            "required": ["query"],
+        },
+    },
+    {
+        "name": "googlesearch",
+        "description": "Search the google",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "query": {
+                    "type": "string",
+                    "description": "The query keywords you used in google search",
+                },
+            },
+            "required": ["query"],
+        },
+    },
+    {
+        "name": "gkgsearch",
+        "description": "Search the google knowledge graph",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "query": {
+                    "type": "string",
+                    "description": "The entity you want to search in google knowledge graph",
+                },
+            },
+            "required": ["query"],
+        },
+    },
+    {
+        "name": "probe",
+        "description": "Get the recent historical time series and related information of a given ICode",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "icode": {
+                    "type": "string",
+                    "description": "The ICode to retrieve the historical time series and related information",
+                },
+            },
+            "required": ["icode"],
+        },
+    },
     {
         "name": "query_icode",
         "description": "Query the ICode used in probe",

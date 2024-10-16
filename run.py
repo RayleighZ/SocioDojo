@@ -93,7 +93,7 @@ def test_sawi(savename='test',ruleset=[]):
     return report
 
 
-def run_ca(savename=None,analyse_fn='',debug_mode=False):
+def run_ca(savename=None,analyse_fn='hnp',debug_mode=False):
     if savename is None: 
         savename=uuid.uuid4()
     print(f'Runing {savename}...')
@@ -101,7 +101,7 @@ def run_ca(savename=None,analyse_fn='',debug_mode=False):
     config['ruleset']=['nodt']
     worldconfig=copy.deepcopy(sawi_worldconfig)
     worldconfig['default_channels']=['TTT']
-    worldconfig['period']=86400
+    worldconfig['period']=43200
     worldconfig['ruleset']=config['ruleset']
     config['worldconfig']=worldconfig
 
@@ -113,18 +113,18 @@ def run_ca(savename=None,analyse_fn='',debug_mode=False):
         'analyst_limit': 4,
         'actuator_limit': 4,
         'assistant_limit': 2,
-        'temperature': 0.2,
+        'temperature': 0.4,
         'top_p': 0.1,
-        'analyst_model': 'llama3.1_70b',
-        'actuator_model': 'llama3.1_70b',
-        'assistant_model': 'llama3.1_70b',
+        'analyst_model': 'llama3.1_8b',
+        'actuator_model': 'llama3.1_8b',
+        'assistant_model': 'llama3.1_8b',
         'model_path': '/home/tione/notebook/rayleighz_prj/LLM-models/Llama-3.1-8B-Instruct',
         'analyst_verbose': True,
         'actuator_verbose': False,
         'assistant_verbose': False,
         'ruleset': config['ruleset'],
         'analyse_fn': analyse_fn,
-        'second_response': True,
+        'second_response': False,
     }
 
     config['agentconfig']=agentconfig
@@ -135,5 +135,5 @@ def run_ca(savename=None,analyse_fn='',debug_mode=False):
     run.run(end_time)
 
 print('running')
-run_ca('llama3.1_8B_0.5day_save_history')
+run_ca('llama3.1_8B_float_0.5day_USFin_verIV')
 # test_sawi()

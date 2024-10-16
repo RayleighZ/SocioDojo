@@ -15,7 +15,7 @@ from pytrends.request import TrendReq
 import pandas_datareader.data as web
 from fredapi import Fred
 
-from Env.const import Buggy
+from Env.const import BuggyFin
 
 
 """
@@ -735,7 +735,7 @@ class OneProbe:
             self.idfs=parallel_load_icodes(root)
             self.probe=self.iprobe
             self.metadata=load_json(pjoin(root, 'Corpus', 'TS', 'metadata.json'))
-            for i in Buggy:
+            for i in BuggyFin:
                 del self.metadata[i]
         else:
             self.gt=GT(root,cache=cache,interpolate=interpolate,sysddir=sysddir)

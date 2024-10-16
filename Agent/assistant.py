@@ -1,4 +1,5 @@
 import os,json
+import pdb
 
 from tqdm import tqdm
 
@@ -190,8 +191,6 @@ class LlamaAssistant(BaseLlamaAssistant):
         done=False
         query=None
         def args_safe_calling(func_name, parameter_name, parameter, func):
-            if func_name in ['wikisearch', 'googlesearch']:
-                return f'ERROR: function {func_name} is not supported by system, please call other functions to get information', "no valid query"
             if parameter_name in parameter:
                 return func(parameter[parameter_name]), parameter[parameter_name]
             else:
@@ -219,14 +218,17 @@ class LlamaAssistant(BaseLlamaAssistant):
                         ret, query=args_safe_calling('wikisearch', 'query', args, self.wikisearch)
                         # ret=self.wikisearch(args['query'])
                         # query=args['query']
+                        print(f'wiki search result: {ret}')
                     elif fn=='googlesearch': 
                         # ret=self.googlesearch(args['query'])
                         # query=args['query']
                         ret, query=args_safe_calling('googlesearch', 'query', args, self.googlesearch)
-                    elif fn=='gkgsearch': 
+                        print(f'google search result: {ret}')
+                    elif fn=='gkgsearch':
                         # ret=self.gkgsearch(args['query'])
                         # query=args['query']
                         ret, query = args_safe_calling('gkgsearch', 'query', args, self.gkgsearch)
+                        print(f'gkg search result: {ret}')
                     elif fn=='probe': 
                         # ret=self.probe(args['icode'])
                         # query=args['icode']
