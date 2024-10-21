@@ -768,7 +768,9 @@ class OneProbe:
             new_df = prior
         else:
             step_size = num_rows // size
-            new_df = prior.iloc[::step_size, :][-size:]
+            residual = num_rows - step_size * size
+            index = [i for i in range(residual - 1, num_rows, step_size)]
+            new_df = prior.iloc[index]
         return new_df
 
 

@@ -9,7 +9,6 @@ from Env.utils import pexist,pjoin,makedirs,save_json,load_json
 from config import sawi_worldconfig,base_config,base_agentconfig
 
 
-
 def build(config,debug_mode=False):
     root=config['root']
     savename=config['savename']
@@ -135,5 +134,5 @@ def run_ca(savename=None,analyse_fn='hnp',debug_mode=False):
     run.run(end_time)
 
 print('running')
-run_ca('llama3.1_8B_float_0.5day_USFin_verIV')
+run_ca('llama3.1_8B_float_0.5day_USFin_verVI')
 # test_sawi()

@@ -14,6 +14,7 @@
       <excludeFolder url="file://$MODULE_DIR$/Agent/db/f638bc75-5a9b-4b98-8e70-59b4804cddba" />
       <excludeFolder url="file://$MODULE_DIR$/Ckpts" />
       <excludeFolder url="file://$MODULE_DIR$/archive" />
+      <excludeFolder url="file://$MODULE_DIR$/Tools/TS" />
     </content>
     <orderEntry type="jdk" jdkName="sajo" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
